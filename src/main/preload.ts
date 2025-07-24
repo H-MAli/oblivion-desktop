@@ -52,6 +52,9 @@ const electronHandler = {
             ipcRenderer.removeAllListeners('wp-start');
             ipcRenderer.removeAllListeners('wp-end');
             ipcRenderer.removeAllListeners('net-stats');
+        },
+        invoke(channel: string, ...args: unknown[]) {
+            return ipcRenderer.invoke(channel, ...args);
         }
     },
     NODE_ENV: process.env.NODE_ENV,
