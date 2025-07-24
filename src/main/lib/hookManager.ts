@@ -79,15 +79,53 @@ class HookManager {
             });
         }
 
-        log.info(`Executing hook: ${hookType} - ${executablePath} ${args.join(' ')}`);
+        // Handle Windows batch files and cmd files
+        let command = executablePath;
+        let commandArgs = args;
+
+        const ext = path.extname(executablePath).toLowerCase();
+        let spawnOptions: any;
+
+        if (process.platform === 'win32' && (ext === '.bat' || ext === '.cmd')) {
+            // For Windows batch files, use shell execution
+            command = executablePath;
+            commandArgs = args;
+            spawnOptions = {
+                detached: true,
+                env,
+                cwd: path.dirname(executablePath),
+                windowsHide: false, // Allow console to show for debugging
+                stdio: ['ignore', 'pipe', 'pipe'], // Capture output for logging
+                shell: true // Use shell execution for batch files
+            };
+        } else {
+            spawnOptions = {
+                detached: true,
+                env,
+                cwd: path.dirname(executablePath),
+                stdio: 'ignore',
+                windowsHide: true
+            };
+        }
+
+        log.info(`Executing hook: ${hookType} - ${command} ${commandArgs.join(' ')}`);
 
         try {
-            const child = spawn(executablePath, args, {
-                detached: true,
-                stdio: 'ignore',
-                windowsHide: true,
-                env
-            });
+            const child = spawn(command, commandArgs, spawnOptions);
+
+            // For Windows batch files, capture and log output for debugging
+            if (process.platform === 'win32' && (ext === '.bat' || ext === '.cmd')) {
+                if (child.stdout) {
+                    child.stdout.on('data', (data) => {
+                        log.info(`Hook ${hookType} stdout: ${data.toString().trim()}`);
+                    });
+                }
+                if (child.stderr) {
+                    child.stderr.on('data', (data) => {
+                        log.warn(`Hook ${hookType} stderr: ${data.toString().trim()}`);
+                    });
+                }
+            }
 
             // Unref the child process so it doesn't keep the parent process alive
             child.unref();
@@ -175,6 +213,7 @@ class HookManager {
      */
     public static async testHook(hookType: HookType): Promise<boolean> {
         try {
+            log.info(`Testing hook: ${hookType}`);
             const hookConfig = await this.getHookConfig(hookType);
             if (!hookConfig.executable) {
                 log.info(`No executable configured for hook: ${hookType}`);
@@ -187,10 +226,45 @@ class HookManager {
             }
 
             log.info(`Hook ${hookType} configuration is valid: ${hookConfig.executable}`);
+            log.info(`Hook ${hookType} arguments: ${hookConfig.args}`);
+
+            // Test actual execution
+            await this.executeHook(hookType, { test: 'true', source: 'manual_test' });
+
             return true;
         } catch (error) {
             log.error(`Error testing hook ${hookType}:`, error);
             return false;
+        }
+    }
+
+    /**
+     * Manual test execution for debugging - executes hook immediately
+     */
+    public static async debugExecuteHook(hookType: HookType): Promise<void> {
+        log.info(`=== DEBUG EXECUTION START for ${hookType} ===`);
+
+        try {
+            const hookConfig = await this.getHookConfig(hookType);
+            log.info(`Hook config retrieved:`, hookConfig);
+
+            if (!hookConfig.executable) {
+                log.warn(`No executable configured for hook: ${hookType}`);
+                return;
+            }
+
+            const exists = fs.existsSync(hookConfig.executable);
+            log.info(`Executable exists: ${exists} - Path: ${hookConfig.executable}`);
+
+            if (!exists) {
+                log.error(`Hook executable not found: ${hookConfig.executable}`);
+                return;
+            }
+
+            await this.runHook(hookType, hookConfig, { debug: 'true', timestamp: Date.now() });
+            log.info(`=== DEBUG EXECUTION COMPLETED for ${hookType} ===`);
+        } catch (error) {
+            log.error(`=== DEBUG EXECUTION ERROR for ${hookType} ===`, error);
         }
     }
 }

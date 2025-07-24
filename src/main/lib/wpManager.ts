@@ -313,6 +313,8 @@ class WarpPlusManager {
                             port: state.settings.port,
                             hostIP: state.settings.hostIP
                         });
+
+                        log.debug('Connection success hook executed successfully');
                     } catch (error) {
                         log.error('Failed to execute connectSuccess hook:', error);
                     }
@@ -336,9 +338,13 @@ class WarpPlusManager {
                     proxyMode: state.settings.proxyMode,
                     port: state.settings.port,
                     hostIP: state.settings.hostIP
-                }).catch((error) => {
-                    log.error('Failed to execute disconnect hook:', error);
-                });
+                })
+                    .then(() => {
+                        log.debug('Disconnect hook executed successfully');
+                    })
+                    .catch((error) => {
+                        log.error('Failed to execute disconnect hook:', error);
+                    });
 
                 if (state.exitOnWpEnd) ipcMain.emit('exit');
                 customEvent.emit('tray-icon', 'disconnected');

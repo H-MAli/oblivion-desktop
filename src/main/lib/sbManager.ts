@@ -455,6 +455,8 @@ class SingBoxManager {
                     hostIP: hostIP || 'unknown',
                     retryAttempts: CONFIG.connection.maxRetries
                 });
+
+                log.debug('Connection failure hook executed successfully');
             } catch (error) {
                 log.error('Failed to execute connectFail hook:', error);
             }

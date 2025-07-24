@@ -125,7 +125,9 @@ const wpErrorTranslation: Record<string, (params: { [key: string]: string }) => 
     'parse args: --country': () => appLang.log.error_country_failed,
     'connection reset by peer': () => {
         return appLang.log.error_wp_reset_peer;
-    }
+    },
+    // TEMPORARY TEST ERROR - Remove after testing
+    TEST_HOOK: () => 'Test hook execution'
 };
 
 export const handleWpErrors = (strData: string, port: string, ipcEvent?: IpcMainEvent) => {
@@ -136,10 +138,15 @@ export const handleWpErrors = (strData: string, port: string, ipcEvent?: IpcMain
             // Execute connection error hook with context
             (async () => {
                 try {
+                    console.log(`=== TRIGGERING CONNECTION ERROR HOOK for: ${errorMsg} ===`);
                     const [proxyMode, hostIP] = await Promise.all([
                         settings.get('proxyMode'),
                         settings.get('hostIP')
                     ]);
+
+                    console.log(
+                        `Hook context: proxyMode=${proxyMode}, port=${port}, hostIP=${hostIP}`
+                    );
 
                     await HookManager.executeHook('connectionError', {
                         proxyMode: proxyMode || 'unknown',
@@ -148,6 +155,8 @@ export const handleWpErrors = (strData: string, port: string, ipcEvent?: IpcMain
                         errorMessage: errorMsg,
                         translatedError: translator({ port })
                     });
+
+                    console.debug('Connection error hook executed successfully');
                 } catch (error) {
                     console.error('Failed to execute connectionError hook:', error);
                 }
@@ -158,4 +167,10 @@ export const handleWpErrors = (strData: string, port: string, ipcEvent?: IpcMain
             );
         }
     });
+};
+
+// TEMPORARY TEST FUNCTION - Remove after testing
+export const testConnectionErrorHook = () => {
+    console.log('=== MANUAL TEST TRIGGER ===');
+    handleWpErrors('TEST_HOOK occurred', '8080');
 };
