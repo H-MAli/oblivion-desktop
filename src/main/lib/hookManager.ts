@@ -15,7 +15,10 @@ class HookManager {
     /**
      * Execute a hook by type
      */
-    public static async executeHook(hookType: HookType, context?: Record<string, any>): Promise<void> {
+    public static async executeHook(
+        hookType: HookType,
+        context?: Record<string, any>
+    ): Promise<void> {
         try {
             const hookConfig = await this.getHookConfig(hookType);
             if (!hookConfig.executable) {
@@ -48,7 +51,11 @@ class HookManager {
     /**
      * Run the hook executable
      */
-    private static async runHook(hookType: HookType, config: HookConfig, context?: Record<string, any>): Promise<void> {
+    private static async runHook(
+        hookType: HookType,
+        config: HookConfig,
+        context?: Record<string, any>
+    ): Promise<void> {
         // Validate executable exists
         if (!fs.existsSync(config.executable)) {
             log.error(`Hook executable not found: ${config.executable}`);
@@ -60,11 +67,11 @@ class HookManager {
 
         // Prepare environment variables with context information
         const env = { ...process.env };
-        
+
         // Add hook type and timestamp
         env.OBLIVION_HOOK_TYPE = hookType;
         env.OBLIVION_TIMESTAMP = new Date().toISOString();
-        
+
         // Add context information as environment variables
         if (context) {
             Object.entries(context).forEach(([key, value]) => {
@@ -111,7 +118,6 @@ class HookManager {
                     log.info(`Hook ${hookType} terminated by signal: ${signal}`);
                 }
             });
-
         } catch (error) {
             log.error(`Failed to spawn hook ${hookType}:`, error);
         }

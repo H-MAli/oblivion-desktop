@@ -132,7 +132,7 @@ export const handleWpErrors = (strData: string, port: string, ipcEvent?: IpcMain
     Object.entries(wpErrorTranslation).forEach(([errorMsg, translator]) => {
         if (strData.includes(errorMsg)) {
             ipcEvent?.reply('guide-toast', translator({ port }));
-            
+
             // Execute connection error hook with context
             (async () => {
                 try {
@@ -140,7 +140,7 @@ export const handleWpErrors = (strData: string, port: string, ipcEvent?: IpcMain
                         settings.get('proxyMode'),
                         settings.get('hostIP')
                     ]);
-                    
+
                     await HookManager.executeHook('connectionError', {
                         proxyMode: proxyMode || 'unknown',
                         port,
@@ -152,7 +152,7 @@ export const handleWpErrors = (strData: string, port: string, ipcEvent?: IpcMain
                     console.error('Failed to execute connectionError hook:', error);
                 }
             })();
-            
+
             removeDirIfExists(stuffPath).catch((err) =>
                 console.log('removeDirIfExists Error:', err.message)
             );

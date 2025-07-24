@@ -304,7 +304,7 @@ class WarpPlusManager {
                             settings.get('endpoint'),
                             settings.get('location')
                         ]);
-                        
+
                         await HookManager.executeHook('connectSuccess', {
                             proxyMode: state.settings.proxyMode,
                             method: method || 'unknown',

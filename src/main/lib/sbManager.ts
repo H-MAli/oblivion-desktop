@@ -448,7 +448,7 @@ class SingBoxManager {
                     settings.get('port'),
                     settings.get('hostIP')
                 ]);
-                
+
                 await HookManager.executeHook('connectFail', {
                     proxyMode: proxyMode || 'unknown',
                     port: port || 'unknown',

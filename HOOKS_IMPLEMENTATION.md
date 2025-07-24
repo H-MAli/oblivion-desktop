@@ -116,6 +116,7 @@ The file dialog filters for common executable file types:
 When hooks are executed, they receive context information through environment variables:
 
 ### Common Environment Variables (All Hooks)
+
 - `OBLIVION_HOOK_TYPE`: The type of hook being executed (`connectSuccess`, `connectFail`, `disconnect`, `connectionError`)
 - `OBLIVION_TIMESTAMP`: ISO timestamp when the hook was triggered
 - `OBLIVION_PROXYMODE`: Current proxy mode (e.g., `tun`, `system`)
@@ -123,20 +124,24 @@ When hooks are executed, they receive context information through environment va
 - `OBLIVION_HOSTIP`: Host IP address
 
 ### Connection Success Hook Additional Variables
+
 - `OBLIVION_METHOD`: Connection method (e.g., `gool`, `psiphon`)
 - `OBLIVION_ENDPOINT`: Connection endpoint
 - `OBLIVION_LOCATION`: Selected location/country
 
 ### Connection Failure Hook Additional Variables
+
 - `OBLIVION_RETRYATTEMPTS`: Number of retry attempts made
 
 ### Connection Error Hook Additional Variables
+
 - `OBLIVION_ERRORMESSAGE`: Raw error message that triggered the hook
 - `OBLIVION_TRANSLATEDERROR`: User-friendly translated error message
 
 ## Example Hook Scripts
 
 ### Windows Batch Script (`test-hook.bat`)
+
 ```batch
 @echo off
 echo Hook executed: %OBLIVION_HOOK_TYPE%
@@ -150,6 +155,7 @@ if defined OBLIVION_ERRORMESSAGE echo Error: %OBLIVION_ERRORMESSAGE%
 ```
 
 ### PowerShell Script (`test-hook.ps1`)
+
 ```powershell
 param([string]$Message = "Hook execution")
 $env:PSModulePath # Access all OBLIVION_* environment variables

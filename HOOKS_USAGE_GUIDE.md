@@ -7,10 +7,10 @@ The hooks feature allows you to automatically run external programs when VPN con
 1. **Open Oblivion Desktop** and navigate to the **Options** page
 2. **Scroll down** to find the "Hooks" section
 3. **Configure each hook type** as needed:
-   - **On Connection Success**: Runs when VPN connects successfully
-   - **On Connection Fail**: Runs when VPN fails to connect
-   - **On Disconnect**: Runs when VPN disconnects
-   - **On Connection Error**: Runs when connection errors occur
+    - **On Connection Success**: Runs when VPN connects successfully
+    - **On Connection Fail**: Runs when VPN fails to connect
+    - **On Disconnect**: Runs when VPN disconnects
+    - **On Connection Error**: Runs when connection errors occur
 
 ## Configuring a Hook
 
@@ -21,16 +21,19 @@ The hooks feature allows you to automatically run external programs when VPN con
 ## Example Use Cases
 
 ### Notification Scripts
+
 - Show desktop notifications when connected/disconnected
 - Play custom sounds for different events
 - Send messages to messaging apps
 
 ### Network Configuration
+
 - Update firewall rules when connected
 - Restart network services
 - Update DNS settings
 
 ### Logging and Monitoring
+
 - Log connection events to files
 - Send status updates to monitoring systems
 - Update external dashboards
@@ -38,6 +41,7 @@ The hooks feature allows you to automatically run external programs when VPN con
 ## Sample Scripts
 
 ### Windows Notification (PowerShell)
+
 ```powershell
 # Save as notify-connection.ps1
 param([string]$Title = "VPN Status")
@@ -46,22 +50,23 @@ $hookType = $env:OBLIVION_HOOK_TYPE
 $timestamp = $env:OBLIVION_TIMESTAMP
 
 switch ($hookType) {
-    "connectSuccess" { 
+    "connectSuccess" {
         [System.Windows.Forms.MessageBox]::Show("VPN Connected Successfully!", $Title)
     }
-    "connectFail" { 
+    "connectFail" {
         [System.Windows.Forms.MessageBox]::Show("VPN Connection Failed!", $Title)
     }
-    "disconnect" { 
+    "disconnect" {
         [System.Windows.Forms.MessageBox]::Show("VPN Disconnected", $Title)
     }
-    "connectionError" { 
+    "connectionError" {
         [System.Windows.Forms.MessageBox]::Show("VPN Connection Error: $env:OBLIVION_ERRORMESSAGE", $Title)
     }
 }
 ```
 
 ### Linux/macOS Notification (Bash)
+
 ```bash
 #!/bin/bash
 # Save as notify-connection.sh and make executable
@@ -93,6 +98,7 @@ Your hook scripts receive information through environment variables:
 - `OBLIVION_HOSTIP`: Host IP address
 
 Additional variables depending on the hook type:
+
 - Connection Success: `OBLIVION_METHOD`, `OBLIVION_ENDPOINT`, `OBLIVION_LOCATION`
 - Connection Failure: `OBLIVION_RETRYATTEMPTS`
 - Connection Error: `OBLIVION_ERRORMESSAGE`, `OBLIVION_TRANSLATEDERROR`
