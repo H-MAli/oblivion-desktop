@@ -1,6 +1,7 @@
 import { IpcMainEvent } from 'electron';
 import settings from 'electron-settings';
 import { countries, defaultSettings } from '../../defaultSettings';
+import { HookManager } from './hookManager';
 import { removeDirIfExists } from './utils';
 import { getTranslate } from '../../localization';
 import { stuffPath } from '../../constants';
@@ -121,17 +122,37 @@ const wpErrorTranslation: Record<string, (params: { [key: string]: string }) => 
     'parse args: unknown flag': () => appLang.log.error_unknown_flag,
     'context deadline exceeded': () => appLang.log.error_deadline_exceeded,
     'connection test failed': () => appLang.log.error_connection_failed,
-    'parse args: --country': () => appLang.log.error_country_failed
-    /*'connection reset by peer': () => {
-        //disconnectApp();
+    'parse args: --country': () => appLang.log.error_country_failed,
+    'connection reset by peer': () => {
         return appLang.log.error_wp_reset_peer;
-    }*/
+    }
 };
 
 export const handleWpErrors = (strData: string, port: string, ipcEvent?: IpcMainEvent) => {
     Object.entries(wpErrorTranslation).forEach(([errorMsg, translator]) => {
         if (strData.includes(errorMsg)) {
             ipcEvent?.reply('guide-toast', translator({ port }));
+            
+            // Execute connection error hook with context
+            (async () => {
+                try {
+                    const [proxyMode, hostIP] = await Promise.all([
+                        settings.get('proxyMode'),
+                        settings.get('hostIP')
+                    ]);
+                    
+                    await HookManager.executeHook('connectionError', {
+                        proxyMode: proxyMode || 'unknown',
+                        port,
+                        hostIP: hostIP || 'unknown',
+                        errorMessage: errorMsg,
+                        translatedError: translator({ port })
+                    });
+                } catch (error) {
+                    console.error('Failed to execute connectionError hook:', error);
+                }
+            })();
+            
             removeDirIfExists(stuffPath).catch((err) =>
                 console.log('removeDirIfExists Error:', err.message)
             );
